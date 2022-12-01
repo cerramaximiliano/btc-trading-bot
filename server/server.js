@@ -18,6 +18,8 @@ const crytoUtils = require('./utils/cryptoUtils');
 const ATR = require('technicalindicators').ATR
 const Binance = require('node-binance-api');
 const { time } = require('console');
+const AWS = require('aws-sdk');
+
 const binance = new Binance().options({
   APIKEY: 'kVjOuliddPpQst74Kw2EZPfjyJSSiAp9vATsrng1rLhBz6t99Iz0UFA0VYB9CrGE',
   APISECRET: 'ysORFkS6jtk6EXeb7ArycxEWVzMfluvqvFzNeHg4Pm5MHnyaL4GXxtMRR6HrLhJ5'
@@ -29,6 +31,7 @@ app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
 
 app.listen(9000, () => {
     mongoose.connect( 'mongodb+srv://maxcerra:988703ab@cluster0.ueaes.azure.mongodb.net/cimenti?retryWrites=true&w=majority' , {useNewUrlParser: true, useUnifiedTopology: true}, (err, res) => {
@@ -57,9 +60,13 @@ const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));
         timezone: "America/Argentina/Buenos_Aires"
     });
 
-
-    cryptoControllers.binance1hUpdate();
-
+    cron.schedule(`*/15 * * * *`, () => {
+        logger.info(`cron 15m update signal timestamp starting....`)
+        cryptoControllers.iterateAllRecordAndUpdateSignalTimeStamp();
+    }, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires"
+    });
     // cron.schedule(`*/10 * * * * *`, () => {
     //     logger.info(`cron 10s update atr starting....`)
     //     cryptoControllers.updateAtr();
@@ -83,12 +90,3 @@ const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));
     // scheduled: true,
     // timezone: "America/Argentina/Buenos_Aires"
     // });
-
-
-    cron.schedule(`*/20 * * * * *`, () => {
-        logger.info(`cron 20s update signal timestamp starting....`)
-        cryptoControllers.iterateAllRecordAndUpdateSignalTimeStamp();
-    }, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-    });

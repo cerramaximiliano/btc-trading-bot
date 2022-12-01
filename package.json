@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.1232.0",
+    "aws-sdk": "^2.1265.0",
     "bcrypt": "^5.1.0",
     "bybit-api": "^3.2.0",
     "chokidar": "^3.5.3",
