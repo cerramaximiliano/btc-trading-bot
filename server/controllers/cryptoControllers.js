@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const cron = require('node-cron');
-const BTC_USDT_BINANCE_1h = require('../models/btc-binance-1h.js');
+const BTC_USDT_BINANCE_1h = require('../models/btc-binance-15m.js');
 const ATR = require('technicalindicators').ATR
 const {logger} = require('../config/pino');
 const {loggerError} = require('../config/pino');
@@ -22,6 +22,7 @@ async function updateAtr () {
 
 exports.updateAtr = async () => {
     const lastAtrRecord = await BTC_USDT_BINANCE_1h.find({atr: {$gte: 0}}).sort({unix: -1}).limit(1)
+
     const nextUnixRecord = lastAtrRecord[0].unix + 3600000;
     const nextUpdateRecord = await BTC_USDT_BINANCE_1h.findOne({unix: nextUnixRecord});
     let date = new Date();
@@ -289,9 +290,13 @@ exports.iterateAll1hRecordsTrendUpDown = async () => {
 exports.iterateAllRecordAndUpdateSignalTimeStamp = async () => {
     try{
         const millisecondsHour = 3600000;
+
         const startDate = await BTC_USDT_BINANCE_1h.findOne({_id: '637b9c92212fc5e68a17e271'});
+
         const findStartDate = await BTC_USDT_BINANCE_1h.findOne({ unix: startDate.data4 });
+
         const lastRecord = await BTC_USDT_BINANCE_1h.findOne({ unix: startDate.data4 - millisecondsHour });
+        
         if(findStartDate === null){
             false
         }else{
