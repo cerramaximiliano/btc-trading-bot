@@ -2,18 +2,10 @@ const cron = require('node-cron');
 const { logger } = require('../config/pino');
 const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 const CHECKSTATUS = require('../models/checkStatus');
-const { ticksPromise } = require('./binanceController'); // Importa la función ticksPromise desde binanceController.js
+const { ticksPromise } = require('./binanceController');
 const { getPreviousQuarterHourUnix } = require('../utils/formatTime');
 
 const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));
-
-/* const quarter = getPreviousQuarterHourUnix();
-console.log(quarter, new Date(quarter).toISOString());
-
-(async () => {
-    const ticks = await ticksPromise("BTCUSDT", "15m", 1, quarter);
-    console.log(ticks[0][0], new Date(ticks[0][0]).toISOString())
-})() */
 
 const cronController = () => { cron.schedule('*/15 * * * *', async () => {
     logger.info(`[cronControler] Cron 15m update signal timestamp starting....`);
@@ -94,7 +86,8 @@ const checkCompleteness = () => {
                     { _id: '65ea47f3c00ef4507c6b71a4' }, 
                     { $set: { 'checkCompleteness.run': false } },
                 );
-                logger.info('[checkCompleteness] No start unix found in the database or start unix is equal to last unix record. Process will stop until user restart it.');
+                logger.info('[checkCompleteness] No start unix found in the database or start unix is equal to last unix record.');
+                logger.warn(`[checkCompleteness] Process will stop until user restart it.`)
                 return;
             }
             const INTERVAL_DIFFERENCE = 60000 * 15; 
@@ -150,7 +143,8 @@ const updateMissingData = () => {
                     { _id: '65ea47f3c00ef4507c6b71a4' }, 
                     { $set: { 'updateMissingData.run': false } },
                 );
-                logger.info(`[updateMissingData] No missing data to find and update. Process will stop until user restart it.`)
+                logger.info(`[updateMissingData] No missing data to find and update.`)
+                logger.warn(`[updateMissingData] Process will stop until user restart it.`)
                 return
             }
             const ticks = await ticksPromise("BTCUSDT", "15m", 1, missingData[0]);
@@ -207,7 +201,8 @@ const updateWrongData = () => {
                     { $set: { 'updateAtr.run': false } },
                     { new: true }
                 );
-                logger.info(`[updateWrongData] No longer data to update. Process will stop until user restart it.`)
+                logger.info(`[updateWrongData] No longer data to update.`)
+                logger.warn(`[updateWrongData] Process will stop until user restart it.`)
                 return
             }
             const ticks = await ticksPromise("BTCUSDT", "15m", 1, startUnix);
@@ -228,7 +223,7 @@ const updateWrongData = () => {
 
 
 const updateAtr = () => {
-    cron.schedule('*/5 * * * * *', async () => {
+    cron.schedule('*/2 * * * *', async () => {
         try{
             const {startArt7, lastUnixRecord, updateAtr} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             if ( !updateAtr.run ){
