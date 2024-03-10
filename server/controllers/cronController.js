@@ -7,7 +7,7 @@ const { getPreviousQuarterHourUnix } = require('../utils/formatTime');
 
 const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));
 
-const cronController = () => { cron.schedule('*/15 * * * *', async () => {
+const cronController = async () => { 
     logger.info(`[cronControler] Cron 15m update signal timestamp starting....`);
     try {
         await timeout(60000)
@@ -23,10 +23,6 @@ const cronController = () => { cron.schedule('*/15 * * * *', async () => {
     } catch (error) {
         logger.error('[cronControler] Error:', error);
     }
-}, {
-    scheduled: true,
-    timezone: "America/Argentina/Buenos_Aires"
-})
 };
 
 //Actualiza los registros hacia atrás - tomando como base el primer registro válido según fecha y campo Unix
@@ -70,8 +66,7 @@ const updateTicks = () => { cron.schedule('*/1 * * * *', async () => {
 });
 }
 
-const checkCompleteness = () => {
-    cron.schedule('*/20 * * * * *', async () => {
+const checkCompleteness = async () => {
         try {
             const {checkCompleteness, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             if ( !checkCompleteness.run ){
@@ -123,14 +118,9 @@ const checkCompleteness = () => {
         } catch (error) {
             logger.error('[checkCompleteness] Error checking completeness:', error);
         }
-    }, {
-        scheduled: true,
-        timezone: "America/Argentina/Buenos_Aires"
-    });
 } 
 
-const updateMissingData = () => {
-    cron.schedule('*/20 * * * * *', async () => {
+const updateMissingData = async () => {
         try {
             const {updateMissingData, missingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             if ( !updateMissingData.run ){
@@ -179,15 +169,9 @@ const updateMissingData = () => {
         }catch (err){
             logger.error(`error: ${err}`)
         }
-    
-    }, {
-        scheduled: true,
-        timezone: "America/Argentina/Buenos_Aires"
-    });
 } 
 
-const updateWrongData = () => {
-    cron.schedule('*/2 * * * * *', async () => {
+const updateWrongData = async () => {
         try {
             const {startUnix, lastUnixRecord, updateWrongData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             const nextData = startUnix + (60000 * 15);
@@ -214,15 +198,11 @@ const updateWrongData = () => {
         }catch(err){
             logger.error(`[updateWrongData] Error: ${err}`)
         }
-    }, {
-        scheduled: true,
-        timezone: "America/Argentina/Buenos_Aires"
-    });
-}
+
+};
 
 
-const updateAtr = () => {
-    cron.schedule('*/2 * * * *', async () => {
+const updateAtr = async () => {
         try{
             const {startArt7, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             if ( !updateAtr.run ){
@@ -253,10 +233,6 @@ const updateAtr = () => {
         }catch(err){
             logger.error('[updateAtr] Error: ', err)
         }
-    }, {
-        scheduled: true,
-        timezone: "America/Argentina/Buenos_Aires"
-    });
 };
 
 

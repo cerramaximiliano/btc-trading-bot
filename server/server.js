@@ -4,10 +4,9 @@ const { setupDatabase } = require('./config/databaseConfig.js');
 const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-
 const cors = require('cors');
 const { logger } = require('./config/pino');
-
+const { runCronTask } = require('./utils/cronTasks');
 const { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData } = require('./controllers/cronController.js')
 
 const binanceRoutes = require('./routes/binanceRoutes');
@@ -26,8 +25,9 @@ app.listen(9000, () => {
 app.use('/binance', binanceRoutes); 
 app.use('/database', databaseRoutes); 
 
-cronController();
-checkCompleteness();
-updateMissingData();
-updateAtr();
-updateWrongData();
+
+runCronTask("updateWrongData", updateWrongData, '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateMissingData", updateMissingData, '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("checkCompleteness", checkCompleteness, '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateAtr", updateAtr, '*/2 * * * *', 'America/Argentina/Buenos_Aires');
