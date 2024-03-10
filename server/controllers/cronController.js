@@ -109,6 +109,7 @@ const checkCompleteness = () => {
                     { _id: '65ea47f3c00ef4507c6b71a4' }, 
                     { $set: { 'updateMissingData.run': true }},
                 );
+                logger.warn(`[checkCompleteness] updateMissingData set to true.`)
             }
             await CHECKSTATUS.findOneAndUpdate(
                 {_id: '65ea47f3c00ef4507c6b71a4'},
@@ -246,6 +247,7 @@ const updateAtr = () => {
             }else{
                 let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
                 const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
+                logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
                 logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
             }
         }catch(err){
