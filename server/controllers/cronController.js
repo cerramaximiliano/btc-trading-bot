@@ -16,13 +16,11 @@ const cronController = () => { cron.schedule('*/15 * * * *', async () => {
         const [time, open, high, low, close] = ticks[0];
         const binanceTime = time;
         logger.info(`[cronControler] Quarter to update: ${quarter}`)
-        const savedRecord = await BTC_USDT_BINANCE_15m.findOneAndUpdate({unix: binanceTime}, {date: new Date(binanceTime),symbol: 'BTC-USDT',open: open,high: high,low: low,close: close}, {upsert: true});
+        const savedRecord = await BTC_USDT_BINANCE_15m.findOneAndUpdate({unix: binanceTime}, {date: new Date(binanceTime),symbol: 'BTC-USDT',open: open,high: high,low: low,close: close}, {upsert: true, new: true});
         const update = await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: "65e63ea63f0bd0c11340c98c" }, {lastUnixRecord: binanceTime});
         const updateCheck = await CHECKSTATUS.findOneAndUpdate({_id: "65ea47f3c00ef4507c6b71a4"}, {lastUnixRecord: binanceTime});
-        console.log(savedRecord)
         logger.info(`[cronControler] Record 15m saved: ${time}, ${open}, ${high}, ${low}, ${close}`);
     } catch (error) {
-        console.log(error)
         logger.error('[cronControler] Error:', error);
     }
 }, {
@@ -225,14 +223,17 @@ const updateWrongData = () => {
 const updateAtr = () => {
     cron.schedule('*/2 * * * *', async () => {
         try{
-            const {startArt7, lastUnixRecord, updateAtr} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
+            const {startArt7, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
             if ( !updateAtr.run ){
                 return
             }
             const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startArt7});
             const nextTime = startArt7 + (60000 * 15);
-
+            const currentQuarter = getPreviousQuarterHourUnix();
             if ( nextTime > lastUnixRecord ){
+                if ( lastUnixRecord < currentQuarter ){
+                    console.log('update lastrecord')
+                }
                 logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr7}`)
                 return
             }
@@ -243,10 +244,8 @@ const updateAtr = () => {
                 await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt7: nextTime});
                 logger.info(`[updateAtr] New atr value to update document`)
             }else{
-                const update = await BTC_USDT_BINANCE_15m.findOneAndUpdate(
-                    {_id: '65ea47f3c00ef4507c6b71a4'},
-                    {startArt7:startArt7}
-                );
+                let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
+                const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
                 logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
             }
         }catch(err){
@@ -256,8 +255,7 @@ const updateAtr = () => {
         scheduled: true,
         timezone: "America/Argentina/Buenos_Aires"
     });
-} 
-
+};
 
 
 module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData };

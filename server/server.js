@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 
 const cors = require('cors');
 const { logger } = require('./config/pino');
-//const { cronController, updateTicks, checkCompleteness, updateAtr } = require('./controllers/cronController.js')
 
 const { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData } = require('./controllers/cronController.js')
 
