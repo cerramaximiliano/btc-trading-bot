@@ -19,6 +19,9 @@ const schema = new mongoose.Schema({
     updateAtr: {
         run: Boolean
     },
+    firstValues: {
+        atr7: Number
+    }
 
 }, {
     collection: 'checkStatus'

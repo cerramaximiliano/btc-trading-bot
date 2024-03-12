@@ -213,7 +213,13 @@ const updateAtr = async () => {
             const currentQuarter = getPreviousQuarterHourUnix();
             if ( nextTime > lastUnixRecord ){
                 if ( lastUnixRecord < currentQuarter ){
-                    console.log('update lastrecord')
+                    const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
+                    const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                        { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                        { $set: { 'checkCompleteness.run': true } },
+                        logger.warn(`[checkCompleteness] Process turn on.`)
+                    );
+                    logger.info('[updateAtr] Update last record')
                 }
                 logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr7}`)
                 return
@@ -223,7 +229,7 @@ const updateAtr = async () => {
                 const newAtr = (lastAtrRecord.atr7 * 6 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 7;
                 await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {atr7: newAtr})
                 await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt7: nextTime});
-                logger.info(`[updateAtr] New atr value to update document`)
+                logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
             }else{
                 let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
                 const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
@@ -236,4 +242,19 @@ const updateAtr = async () => {
 };
 
 
-module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData };
+const updateTrending = async () => {
+    const INTERVAL_DIFFERENCE = 15 * 60000;
+    const startUnix = await CHECKSTATUS.findOne({_id: "65ea47f3c00ef4507c6b71a4"});
+    const currentRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startUnix.firstValues.atr7});
+    const lastRecord = await BTC_USDT_BINANCE_15m.findOne({unix: currentRecord.unix - INTERVAL_DIFFERENCE });
+
+    const lh2 = (currentRecord.low + currentRecord.high ) / 2;
+    const up = lh2 - (3 * currentRecord.atr7);
+    const down = lh2 + (3 * currentRecord.atr7); 
+
+    const upTrend = lastRecord.close > lastRecord.upTrend ? Math.max(up, lastRecord.upTrend) : up;
+    const downTrend = lastRecord.close < lastRecord.downTrend ? Math.min(down, lastRecord.downTrend) : down;
+    console.log(up, down, upTrend, downTrend)
+};
+
+module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData, updateTrending };
