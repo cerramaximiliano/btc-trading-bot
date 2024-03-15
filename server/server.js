@@ -26,10 +26,10 @@ app.use('/binance', binanceRoutes);
 app.use('/database', databaseRoutes); 
 
 
-runCronTask("updateWrongData", updateWrongData, '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateMissingData", updateMissingData, '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("checkCompleteness", checkCompleteness, '*/10 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateAtr", updateAtr, '*/2 * * * *', 'America/Argentina/Buenos_Aires');
+//runCronTask("updateWrongData", updateWrongData, '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
+//runCronTask("updateMissingData", updateMissingData, '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
+//runCronTask("checkCompleteness", checkCompleteness, '*/10 * * * * *', 'America/Argentina/Buenos_Aires');
+//runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina/Buenos_Aires');
+//runCronTask("updateAtr", updateAtr, '*/2 * * * *', 'America/Argentina/Buenos_Aires');
 
 updateTrending()
