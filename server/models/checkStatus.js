@@ -4,6 +4,7 @@ const schema = new mongoose.Schema({
     startUnix: {type: Number},
     startArt7: {type: Number},
     startUnixMissingData: {type: Number},
+    startUpDown: {type: Number},
     missingData: {type: Array},
     missingDataHandled: {type: Array},
     lastUnixRecord: {type: Number},
@@ -21,8 +22,10 @@ const schema = new mongoose.Schema({
     },
     firstValues: {
         atr7: Number
+    },
+    trendingData: { 
+        atr7Trending3: [Array]
     }
-
 }, {
     collection: 'checkStatus'
 })

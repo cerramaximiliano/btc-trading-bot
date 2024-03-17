@@ -31,5 +31,4 @@ app.use('/database', databaseRoutes);
 //runCronTask("checkCompleteness", checkCompleteness, '*/10 * * * * *', 'America/Argentina/Buenos_Aires');
 //runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina/Buenos_Aires');
 //runCronTask("updateAtr", updateAtr, '*/2 * * * *', 'America/Argentina/Buenos_Aires');
-
-updateTrending()
+runCronTask("updateTrending", updateTrending, '*/1 * * * * *', 'America/Argentina/Buenos_Aires');
