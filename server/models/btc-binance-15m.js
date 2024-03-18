@@ -9,14 +9,6 @@ const schema = new mongoose.Schema({
     low: {type: Number},
     close: {type: Number},
     atr7: {type: Number},
-    up: {type: Number},
-    down: {type: Number},
-    upTrend: {type: Number},
-    downTrend:  {type: Number},
-    chartOHLC: {type: Array},
-    buySellSignal: {type: Number},
-    signal: {type: Number},
-    signals: {type: Array},
 }, {
     collection: 'btc/usdt-binance-15m'
 })
