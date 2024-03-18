@@ -3,8 +3,10 @@ const { logger } = require('../config/pino');
 const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 const CHECKSTATUS = require('../models/checkStatus');
 const BTC_USDT_BINANCE_15m_Trending_Atr7 = require('../models/btc-binance-15m-trending');
+const BTC_USDT_BINANCE_15m_Signal_Atr7 = require('../models/btc-binanc-15m-signal-atr7');
 const { ticksPromise } = require('./binanceController');
 const { getPreviousQuarterHourUnix } = require('../utils/formatTime');
+const { upDownTrending, buySellSignalFunction } = require('../utils/calcFunctions');
 
 const timeout = millis => new Promise(resolve => setTimeout(resolve, millis));
 
@@ -230,6 +232,11 @@ const updateAtr = async () => {
                 const newAtr = (lastAtrRecord.atr7 * 6 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 7;
                 await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {atr7: newAtr})
                 await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt7: nextTime});
+                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                    { $set: { 'updateUpDown.run': true } },
+                );
+                logger.warn(`[updateTrending] Process turn on.`)
                 logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
             }else{
                 let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
@@ -248,15 +255,22 @@ const updateTrending = async () => {
         const INTERVAL_DIFFERENCE = 15 * 60000;
         const startUnix = await CHECKSTATUS.findOne({_id: "65ea47f3c00ef4507c6b71a4"});
         const currentRecord = await BTC_USDT_BINANCE_15m.findOne({ unix: startUnix.startUpDown });
-        const lastRecord = await BTC_USDT_BINANCE_15m.findOne({unix: currentRecord.unix - INTERVAL_DIFFERENCE });
-        const lastRecordTrending = await BTC_USDT_BINANCE_15m_Trending_Atr7.findOne({unix: lastRecord.unix})
-
-        if ( currentRecord.unix > startUnix.lastUnixRecord ){
-            logger.info(`[updateTrending] Couldn't update current record: current record is greater than last Unix Record`)
+        if ( !startUnix.updateUpDown.run){
             return
         }
+        if ( !currentRecord || currentRecord.unix > startUnix.lastUnixRecord  ){
+            logger.info(`[updateTrending] Couldn't update current record: current record is greater than last Unix Record`)
+            const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                { $set: { 'updateUpDown.run': false } },
+                );
+                logger.warn(`[updateTrending] Process turn off un user restart it.`)
+                return
+        }
+        const lastRecord = await BTC_USDT_BINANCE_15m.findOne({unix: currentRecord.unix - INTERVAL_DIFFERENCE });
+        const lastRecordTrending = await BTC_USDT_BINANCE_15m_Trending_Atr7.findOne({unix: lastRecord.unix})
         if ( !currentRecord.atr7 ){
-            logger.warn(`[updateTrending] Current Record missing atr7 data`)
+            logger.warn(`[updateTrending] Current Record missing atr7 data: ${currentRecord.unix}`)
             return
         }
         /* Last record doesn'nt exist and Last record is not first ATR value -because there is not minus value than first atr record value- */
@@ -264,48 +278,9 @@ const updateTrending = async () => {
             logger.warn(`[updateTrending] Missing last record trending data`)
             return
         }
-    
-        const lh2 = (currentRecord.low + currentRecord.high ) / 2;
-        const up = lh2 - (3 * currentRecord.atr7);
-        const down = lh2 + (3 * currentRecord.atr7); 
 
-        if ( lastRecordTrending && lastRecordTrending.trending3) {
-            upTrend = lastRecord.close > lastRecordTrending.trending3.upTrend ? Math.max(up, lastRecordTrending.trending3.upTrend) : up;
-            downTrend = lastRecord.close < lastRecordTrending.trending3.downTrend ? Math.min(down, lastRecordTrending.trending3.downTrend) : down;
-        } else {
-            upTrend = up;
-            downTrend = down;
-        }
-
-        let buySellSignal;
-        let signal;
-                                    /* if currentRecord is equal to first atr7 value on database, skip this process -because there is no trend data in no atr record data
-                                        in lastRecord */
-                                    if (currentRecord.unix === startUnix.firstValues.atr7){
-                                        logger.info(`[updateTrending] Current record is first atr record. Couldn't update buy sell signal`)
-                                    }else{
-                                        if( currentRecord.close > lastRecordTrending.trending3.downTrend ){
-                                            buySellSignal = up;
-                                            signal = 1;
-                                        }else {
-                                            if( currentRecord.close  < lastRecordTrending.trending3.upTrend ){
-                                                buySellSignal = down;
-                                                signal = -1;
-                                            }else{
-                                                if(lastRecordTrending.trending3.signal === undefined){
-                                                    false
-                                                }else{
-                                                    if(lastRecordTrending.trending3.signal === 1){
-                                                        buySellSignal = up; 
-                                                        signal = lastRecordTrending.trending3.signal;
-                                                    }else{
-                                                        buySellSignal = down; 
-                                                        signal = lastRecordTrending.trending3.signal;
-                                                    }
-                                                }
-                                            }
-                                        };
-                                    }
+        let { up, down, upTrend, downTrend } = upDownTrending(currentRecord, lastRecord, lastRecordTrending, 3);
+        let { buySellSignal, signal } = buySellSignalFunction( currentRecord, lastRecordTrending, startUnix, up, down );
 
                                     const trendingObject = {
                                         up: up !== undefined ? up : undefined,
@@ -337,16 +312,20 @@ const updateTrending = async () => {
                                             obj.unix = currentRecord.unix
                                         }
                                         if ( obj.signal ){
-                                            const signal = await CHECKSTATUS.findOneAndUpdate(
-                                                {_id: "65ea47f3c00ef4507c6b71a4"},
-                                                {$push: {'trendingData.atr7Trending3': obj}},
-                                                {new: true}
+                                            const signal = await BTC_USDT_BINANCE_15m_Signal_Atr7.findOneAndUpdate(
+                                                {unix: currentRecord.unix},
+                                                {   date: obj.date,
+                                                    trending3Signal: obj.signal
+                                                },
+                                                {   upsert: true,
+                                                    new: true
+                                                }
                                             );
                                             //console.log(signal)
                                             logger.info(`[updateTrending] Updated signal alert to ${obj.signal}`)
                                         }
                                     }
-                                    logger.info(`[updateTrending] Updated current record ${currentRecord.unix}. Current signal: ${trendingObject.signal}`)
+                                    logger.info(`[updateTrending] Updated current record ${currentRecord.unix}-${new Date(currentRecord.unix).toISOString()}. Current signal: ${trendingObject.signal}`)
     }catch(err){
         console.log(err)
         logger.error(`[updateTrending] Error: ${err}`)

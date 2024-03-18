@@ -20,11 +20,11 @@ const schema = new mongoose.Schema({
     updateAtr: {
         run: Boolean
     },
+    updateUpDown: {
+        run: Boolean
+    },
     firstValues: {
         atr7: Number
-    },
-    trendingData: { 
-        atr7Trending3: [Array]
     }
 }, {
     collection: 'checkStatus'
