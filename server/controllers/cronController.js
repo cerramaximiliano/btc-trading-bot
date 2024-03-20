@@ -3,7 +3,7 @@ const { logger } = require('../config/pino');
 const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 const CHECKSTATUS = require('../models/checkStatus');
 const BTC_USDT_BINANCE_15m_Trending_Atr7 = require('../models/btc-binance-15m-trending');
-const BTC_USDT_BINANCE_15m_Signal_Atr7 = require('../models/btc-binanc-15m-signal-atr7');
+const BTC_USDT_BINANCE_15m_Signal_Atr7 = require('../models/btc-binance-15m-signal-atr7');
 const { ticksPromise } = require('./binanceController');
 const { getPreviousQuarterHourUnix } = require('../utils/formatTime');
 const { upDownTrending, buySellSignalFunction } = require('../utils/calcFunctions');
@@ -249,6 +249,96 @@ const updateAtr = async () => {
         }
 };
 
+const updateAtr10 = async () => {
+    try{
+        const {startArt10, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
+        if ( !updateAtr.run ){
+            return
+        }
+         const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startArt10});
+        const nextTime = startArt10 + (60000 * 15);
+        const currentQuarter = getPreviousQuarterHourUnix();
+        if ( nextTime > lastUnixRecord ){
+            if ( lastUnixRecord < currentQuarter ){
+                const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
+                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                    { $set: { 'checkCompleteness.run': true } },
+                    logger.warn(`[checkCompleteness] Process turn on.`)
+                );
+                logger.info('[updateAtr] Update last record')
+            }
+            logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr10}`)
+            return
+        }
+        const nextUpdateRecord = await BTC_USDT_BINANCE_15m.findOne({unix: nextTime});
+
+        if ( nextUpdateRecord ){
+            const newAtr = (lastAtrRecord.atr10 * 9 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 10;
+            await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {atr10: newAtr})
+            await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt10: nextTime});
+/*             const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                { $set: { 'updateUpDown.run': true } },
+            ); */
+            /* logger.warn(`[updateTrending] Process turn on.`) */
+            logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
+        }else{
+            let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
+            const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
+            logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
+            logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
+        }
+    }catch(err){
+        logger.error('[updateAtr] Error: ', err)
+    }
+};
+
+
+const updateAtr14 = async () => {
+    try{
+        const {startAtr14, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
+        if ( !updateAtr.run ){
+            return
+        }
+         const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startAtr14});
+        const nextTime = startAtr14 + (60000 * 15);
+        const currentQuarter = getPreviousQuarterHourUnix();
+        if ( nextTime > lastUnixRecord ){
+            if ( lastUnixRecord < currentQuarter ){
+                const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
+                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                    { $set: { 'checkCompleteness.run': true } },
+                    logger.warn(`[checkCompleteness] Process turn on.`)
+                );
+                logger.info('[updateAtr] Update last record')
+            }
+            logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr14}`)
+            return
+        }
+        const nextUpdateRecord = await BTC_USDT_BINANCE_15m.findOne({unix: nextTime});
+
+        if ( nextUpdateRecord ){
+            const newAtr = (lastAtrRecord.startAtr14 * 13 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 14;
+            await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {startAtr14: newAtr})
+            await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startAtr14: nextTime});
+/*             const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                { $set: { 'updateUpDown.run': true } },
+            ); */
+            /* logger.warn(`[updateTrending] Process turn on.`) */
+            logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
+        }else{
+            let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
+            const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
+            logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
+            logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
+        }
+    }catch(err){
+        logger.error('[updateAtr] Error: ', err)
+    }
+};
 
 const updateTrending = async () => {
     try {
@@ -333,4 +423,4 @@ const updateTrending = async () => {
 
 };
 
-module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData, updateTrending };
+module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateAtr10, updateAtr14, updateWrongData, updateTrending };

@@ -46,4 +46,44 @@ const buySellSignalFunction = (currentRecord, lastRecordTrending, startUnix, up,
     return { buySellSignal, signal }
 };
 
-module.exports = {upDownTrending, buySellSignalFunction}
+function simulateResultTrading(signalsData, comisionCompra, comisionVenta, saldoInicial, accionesIniciales) {
+    let saldoParcial = saldoInicial; // Saldo parcial
+    let acciones = accionesIniciales || 0; // Cantidad de acciones en cartera
+    let operaciones = []; // Array para almacenar las operaciones realizadas
+
+    signalsData.signals.forEach((signal) => {
+        let comision = 0; // Comisión por esta transacción
+        let variacionSaldo = 0; // Variación del saldo parcial en esta transacción
+
+        if (signal.trending3Signal === 'BUY') {
+            // Realizar compra si hay saldo suficiente
+            if (saldoParcial >= signal.close + comisionCompra) {
+                acciones += 1;
+                saldoParcial -= signal.close + comisionCompra;
+                comision = comisionCompra;
+                operaciones.push({ fecha: signal.date, accion: 'COMPRA', precio: signal.close, comision });
+            }
+        } else if (signal.trending3Signal === 'SELL') {
+            // Realizar venta si se tienen acciones en cartera
+            if (acciones > 0) {
+                saldoParcial += signal.close - comisionVenta;
+                variacionSaldo = signal.close; // Variación respecto al precio de compra
+                acciones -= 1;
+                comision = comisionVenta;
+                operaciones.push({ fecha: signal.date, accion: 'VENTA', precio: signal.close, variacionSaldo, comision });
+            }
+        }
+
+        // Actualizar saldo parcial con la variación de esta transacción y la comisión
+        saldoParcial += variacionSaldo - comision;
+    });
+
+    // Calcular rendimiento final
+    const saldoFinal = saldoParcial + (acciones * signalsData.signals[signalsData.signals.length - 1].close);
+    const rendimiento = saldoFinal - saldoInicial; // Rendimiento neto
+
+    return { saldoInicial, saldoFinal, rendimiento, operaciones };
+}
+
+
+module.exports = {upDownTrending, buySellSignalFunction, simulateResultTrading}

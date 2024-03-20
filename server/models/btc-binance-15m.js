@@ -9,6 +9,8 @@ const schema = new mongoose.Schema({
     low: {type: Number},
     close: {type: Number},
     atr7: {type: Number},
+    atr10: {type: Number},
+    atr14: {type: Number}
 }, {
     collection: 'btc/usdt-binance-15m'
 })
