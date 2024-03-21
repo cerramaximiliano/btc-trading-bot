@@ -245,7 +245,7 @@ const updateAtr = async (atrType, atrField, startField) => {
         }
     }catch(err){
         console.log(err)
-        logger.error('[updateAtr${atrType}] Error: ', err)
+        logger.error(`[updateAtr${atrType}] Error: `, err)
     }
 };
 
