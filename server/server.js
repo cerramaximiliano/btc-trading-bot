@@ -29,12 +29,12 @@ app.use('/database', databaseRoutes);
 app.use('/trends', trendingRoutes);
 app.use('/signals', signalRoutes);
 
-runCronTask("updateWrongData", updateWrongData, '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateMissingData", updateMissingData, '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("checkCompleteness", checkCompleteness, '*/10 * * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateTrending", updateTrending, '*/1 * * * *', 'America/Argentina/Buenos_Aires'); 
-runCronTask("updateAtr", updateAtr(7, 'atr7', 'startArt7'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateAtr", updateAtr(10, 'atr10', 'startArt10'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
-runCronTask("updateAtr", updateAtr(14, 'atr14', 'startAtr14'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateWrongData", updateWrongData, [], '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateMissingData", updateMissingData, [], '*/20 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("checkCompleteness", checkCompleteness, [], '*/10 * * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("cronController", cronController, [], '*/15 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateTrending", updateTrending, [], '*/1 * * * *', 'America/Argentina/Buenos_Aires'); 
+runCronTask("updateAtr", updateAtr, [7, 'atr7', 'startArt7'], '*/2 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateAtr", updateAtr, [10, 'atr10', 'startArt10'], '*/2 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateAtr", updateAtr, [14, 'atr14', 'startAtr14'], '*/2 * * * * *', 'America/Argentina/Buenos_Aires');
 

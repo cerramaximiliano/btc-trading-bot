@@ -1,11 +1,12 @@
 const cron = require('node-cron');
 const { logger } = require('../config/pino');
 
-const runCronTask = async (taskName, taskFunction, schedule, timezone) => {
+const runCronTask = async (taskName, taskFunction, args, schedule, timezone) => {
     cron.schedule(schedule, async () => {
         try {
-            await taskFunction();
+            await taskFunction(...args);
         } catch (error) {
+            console.log(error)
             logger.error(`[${taskName}] Error:`, error);
         }
     }, {

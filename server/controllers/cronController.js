@@ -231,12 +231,14 @@ const updateAtr = async (atrType, atrField, startField) => {
             const newAtr = (lastAtrRecord[atrField] * (atrType - 1) + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / atrType;
             await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {[atrField]: newAtr})
             await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {[startField]: nextTime});
-            const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                { $set: { 'updateUpDown.run': true } },
-            );
-            logger.warn(`[updateTrending] Process turn on.`)
-            logger.info(`[updateAtr${atrType}] New atr value to update document unix ${nextUpdateRecord.unix}`)
+            if ( atrField === 'atr7' ) {
+                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                    { $set: { 'updateUpDown.run': true } },
+                );
+                logger.warn(`[updateTrending] Process turn on.`)
+                logger.info(`[updateAtr${atrType}] New atr value to update document unix ${nextUpdateRecord.unix}`)
+            }
         }else{
             let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
             const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
