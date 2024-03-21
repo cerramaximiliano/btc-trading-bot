@@ -208,6 +208,7 @@ const updateAtr = async (atrType, atrField, startField) => {
     try{
         const {[startField]: start, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
         if ( !updateAtr.run ){
+            logger.info(`[updateAtr${atrType}] Process status off` )
             return
         }
         const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: start});
@@ -237,8 +238,8 @@ const updateAtr = async (atrType, atrField, startField) => {
                     { $set: { 'updateUpDown.run': true } },
                 );
                 logger.warn(`[updateTrending] Process turn on.`)
-                logger.info(`[updateAtr${atrType}] New atr value to update document unix ${nextUpdateRecord.unix}`)
             }
+            logger.info(`[updateAtr${atrType}] New atr value to update document unix ${nextUpdateRecord.unix}`)
         }else{
             let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
             const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
@@ -246,7 +247,6 @@ const updateAtr = async (atrType, atrField, startField) => {
             logger.info(`[updateAtr${atrType}] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
         }
     }catch(err){
-        console.log(err)
         logger.error(`[updateAtr${atrType}] Error: `, err)
     }
 };
