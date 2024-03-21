@@ -201,142 +201,51 @@ const updateWrongData = async () => {
         }catch(err){
             logger.error(`[updateWrongData] Error: ${err}`)
         }
-
 };
 
 
-const updateAtr = async () => {
-        try{
-            const {startArt7, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
-            if ( !updateAtr.run ){
-                return
-            }
-            const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startArt7});
-            const nextTime = startArt7 + (60000 * 15);
-            const currentQuarter = getPreviousQuarterHourUnix();
-            if ( nextTime > lastUnixRecord ){
-                if ( lastUnixRecord < currentQuarter ){
-                    const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
-                    const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                        { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                        { $set: { 'checkCompleteness.run': true } },
-                        logger.warn(`[checkCompleteness] Process turn on.`)
+const updateAtr = async (atrType, atrField, startField) => {
+    try{
+        const {[startField]: start, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
+        console.log(start)
+        if ( !updateAtr.run ){
+            return
+        }
+        const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: start});
+        const nextTime = start + (60000 * 15);
+        const currentQuarter = getPreviousQuarterHourUnix();
+        if ( nextTime > lastUnixRecord ){
+            if ( lastUnixRecord < currentQuarter ){
+                const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
+                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
+                    { $set: { 'checkCompleteness.run': true } },
+                    logger.warn(`[checkCompleteness] Process turn on.`)
                     );
-                    logger.info('[updateAtr] Update last record')
+                    logger.info(`[updateAtr${atrType}] Update last record`)
                 }
-                logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr7}`)
+                logger.info(`[updateAtr${atrType}] No data to update. Last atr: ${lastAtrRecord[atrField]}`)
                 return
             }
-            const nextUpdateRecord = await BTC_USDT_BINANCE_15m.findOne({unix: nextTime});
-            if ( nextUpdateRecord ){
-                const newAtr = (lastAtrRecord.atr7 * 6 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 7;
-                await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {atr7: newAtr})
-                await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt7: nextTime});
-                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                    { $set: { 'updateUpDown.run': true } },
-                );
-                logger.warn(`[updateTrending] Process turn on.`)
-                logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
-            }else{
-                let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
-                const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
-                logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
-                logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
-            }
-        }catch(err){
-            logger.error('[updateAtr] Error: ', err)
-        }
-};
-
-const updateAtr10 = async () => {
-    try{
-        const {startArt10, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
-        if ( !updateAtr.run ){
-            return
-        }
-         const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startArt10});
-        const nextTime = startArt10 + (60000 * 15);
-        const currentQuarter = getPreviousQuarterHourUnix();
-        if ( nextTime > lastUnixRecord ){
-            if ( lastUnixRecord < currentQuarter ){
-                const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
-                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                    { $set: { 'checkCompleteness.run': true } },
-                    logger.warn(`[checkCompleteness] Process turn on.`)
-                );
-                logger.info('[updateAtr] Update last record')
-            }
-            logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr10}`)
-            return
-        }
         const nextUpdateRecord = await BTC_USDT_BINANCE_15m.findOne({unix: nextTime});
-
         if ( nextUpdateRecord ){
-            const newAtr = (lastAtrRecord.atr10 * 9 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 10;
-            await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {atr10: newAtr})
-            await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startArt10: nextTime});
-/*             const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
+            const newAtr = (lastAtrRecord[atrField] * (atrType - 1) + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / atrType;
+            await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {[atrField]: newAtr})
+            await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {[startField]: nextTime});
+            const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
                 { _id: '65ea47f3c00ef4507c6b71a4' }, 
                 { $set: { 'updateUpDown.run': true } },
-            ); */
-            /* logger.warn(`[updateTrending] Process turn on.`) */
-            logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
+            );
+            logger.warn(`[updateTrending] Process turn on.`)
+            logger.info(`[updateAtr${atrType}] New atr value to update document unix ${nextUpdateRecord.unix}`)
         }else{
             let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
             const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
-            logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
-            logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
+            logger.warn(`[updateAtr${atrType}] checkCompleteness set to true starting on ${unixMissing}`)
+            logger.info(`[updateAtr${atrType}] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
         }
     }catch(err){
-        logger.error('[updateAtr] Error: ', err)
-    }
-};
-
-
-const updateAtr14 = async () => {
-    try{
-        const {startAtr14, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
-        if ( !updateAtr.run ){
-            return
-        }
-         const lastAtrRecord = await BTC_USDT_BINANCE_15m.findOne({unix: startAtr14});
-        const nextTime = startAtr14 + (60000 * 15);
-        const currentQuarter = getPreviousQuarterHourUnix();
-        if ( nextTime > lastUnixRecord ){
-            if ( lastUnixRecord < currentQuarter ){
-                const updateLastUnixRecord = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startUnixMissingData: nextTime});
-                const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                    { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                    { $set: { 'checkCompleteness.run': true } },
-                    logger.warn(`[checkCompleteness] Process turn on.`)
-                );
-                logger.info('[updateAtr] Update last record')
-            }
-            logger.info(`[updateAtr] No data to update. Last atr: ${lastAtrRecord.atr14}`)
-            return
-        }
-        const nextUpdateRecord = await BTC_USDT_BINANCE_15m.findOne({unix: nextTime});
-
-        if ( nextUpdateRecord ){
-            const newAtr = (lastAtrRecord.startAtr14 * 13 + ( Math.max(Math.max(nextUpdateRecord.high - nextUpdateRecord.low, nextUpdateRecord.high - lastAtrRecord.close ), lastAtrRecord.close -  nextUpdateRecord.low ) )) / 14;
-            await BTC_USDT_BINANCE_15m.findOneAndUpdate({_id: nextUpdateRecord._id}, {startAtr14: newAtr})
-            await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {startAtr14: nextTime});
-/*             const updatedDocument = await CHECKSTATUS.findOneAndUpdate(
-                { _id: '65ea47f3c00ef4507c6b71a4' }, 
-                { $set: { 'updateUpDown.run': true } },
-            ); */
-            /* logger.warn(`[updateTrending] Process turn on.`) */
-            logger.info(`[updateAtr] New atr value to update document unix ${nextUpdateRecord.unix}`)
-        }else{
-            let unixMissing = startUnixMissingData > nextTime ? nextTime : startUnixMissingData;
-            const update = await CHECKSTATUS.findOneAndUpdate({_id: '65ea47f3c00ef4507c6b71a4'}, {$set: { 'checkCompleteness.run': true, startUnixMissingData: unixMissing } });
-            logger.warn(`[updateAtr] checkCompleteness set to true starting on ${unixMissing}`)
-            logger.info(`[updateAtr] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
-        }
-    }catch(err){
-        logger.error('[updateAtr] Error: ', err)
+        logger.error('[updateAtr${atrType}] Error: ', err)
     }
 };
 
