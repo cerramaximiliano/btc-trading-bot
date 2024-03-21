@@ -7,7 +7,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { logger } = require('./config/pino');
 const { runCronTask } = require('./utils/cronTasks');
-const { cronController, checkCompleteness, updateMissingData, updateAtr, updateAtr10, updateAtr14, updateWrongData, updateTrending } = require('./controllers/cronController.js')
+const { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData, updateTrending } = require('./controllers/cronController.js')
 
 const binanceRoutes = require('./routes/binanceRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
@@ -36,4 +36,5 @@ runCronTask("cronController", cronController, '*/15 * * * *', 'America/Argentina
 runCronTask("updateTrending", updateTrending, '*/1 * * * *', 'America/Argentina/Buenos_Aires'); 
 runCronTask("updateAtr", updateAtr(7, 'atr7', 'startArt7'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
 runCronTask("updateAtr", updateAtr(10, 'atr10', 'startArt10'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
+runCronTask("updateAtr", updateAtr(14, 'atr14', 'startAtr14'), '*/2 * * * *', 'America/Argentina/Buenos_Aires');
 

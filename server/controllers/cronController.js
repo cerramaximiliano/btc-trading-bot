@@ -207,7 +207,6 @@ const updateWrongData = async () => {
 const updateAtr = async (atrType, atrField, startField) => {
     try{
         const {[startField]: start, lastUnixRecord, updateAtr, startUnixMissingData} = await CHECKSTATUS.findOne({_id: '65ea47f3c00ef4507c6b71a4'});
-        console.log(start)
         if ( !updateAtr.run ){
             return
         }
@@ -245,6 +244,7 @@ const updateAtr = async (atrType, atrField, startField) => {
             logger.info(`[updateAtr${atrType}] No next document to update atr. Next document ${nextTime} ${new Date(nextTime).toISOString()}`)
         }
     }catch(err){
+        console.log(err)
         logger.error('[updateAtr${atrType}] Error: ', err)
     }
 };
@@ -332,4 +332,4 @@ const updateTrending = async () => {
 
 };
 
-module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateAtr10, updateAtr14, updateWrongData, updateTrending };
+module.exports = { cronController, checkCompleteness, updateMissingData, updateAtr, updateWrongData, updateTrending };
