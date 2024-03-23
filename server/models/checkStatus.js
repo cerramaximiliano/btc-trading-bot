@@ -7,6 +7,8 @@ const schema = new mongoose.Schema({
     startAtr14: {type: Number},
     startUnixMissingData: {type: Number},
     startUpDown: {type: Number},
+    startUpDownArt10Trending3: {type: Number},
+    startUpDownArt14Trending3: {type: Number},
     missingData: {type: Array},
     missingDataHandled: {type: Array},
     lastUnixRecord: {type: Number},
@@ -22,7 +24,19 @@ const schema = new mongoose.Schema({
     updateAtr: {
         run: Boolean
     },
+    updateAtr10: {
+        run: Boolean
+    },
+    updateAtr14: {
+        run: Boolean
+    },
     updateUpDown: {
+        run: Boolean
+    },
+    updateUpDownArt10Trend3:{
+        run: Boolean
+    },
+    updateUpDownArt14Trend3:{
         run: Boolean
     },
     firstValues: {

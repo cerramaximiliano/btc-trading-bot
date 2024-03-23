@@ -5,7 +5,7 @@ const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 const getSignals = async (req, res) => {
     try {
         // Parámetros de consulta
-        const { start, end, signal, page, order, calcularRendimiento, saldoInicial, limit } = req.query;
+        const { start, end, signal, page, order, calcularRendimiento, saldoInicial, limit, feeBuy, feeSell, tipoSaldo } = req.query;
         // Construir la consulta
         let query = {};
         if (start || end) {
@@ -40,7 +40,7 @@ const getSignals = async (req, res) => {
         // Calcular el rendimiento si es necesario
         let rendimientoTotal = null;
         if (calcularRendimiento === 'true') {
-            rendimientoTotal = calcularRendimientoFuncion(signals, closeValues, saldoInicial);
+            rendimientoTotal = calcularRendimientoFuncion(signals, closeValues, saldoInicial, feeBuy, feeSell, tipoSaldo);
         }
 
         // Respuesta
@@ -51,37 +51,68 @@ const getSignals = async (req, res) => {
 };
 
 // Función para calcular el rendimiento
-const calcularRendimientoFuncion = (signals, closeValues, saldoInicial) => {
+const calcularRendimientoFuncion = (signals, closeValues, saldoInicial, comisionCompra, comisionVenta, tipoSaldoInicial) => {
     let saldoFinal = saldoInicial; // Saldo final inicialmente igual al saldo inicial
     let rendimientoTotal = 0; // Rendimiento total inicialmente 0
     let operaciones = []; // Lista para almacenar detalles de operaciones
 
     // Iterar sobre las señales
+    let tipoOperacionInicial = tipoSaldoInicial === 'USDT' ? 'BUY' : 'SELL';
+    console.log(tipoOperacionInicial, tipoOperacionInicial)
     for (let i = 0; i < signals.length; i++) {
         const signal = signals[i];
         const close = closeValues[i].close;
 
+        if (operaciones.length === 0){
+            if (tipoOperacionInicial === signal.trending3Signal && tipoOperacionInicial === 'SELL') {
+                console.log('SELL', tipoOperacionInicial, tipoOperacionInicial, signal.trending3Signal)
+                // Registrar la operación de venta
+                saldoFinal = saldoFinal * (1 - comisionCompra) / close;
+                operaciones.push({
+                    type: 'SELL',
+                    price: close,
+                    balance: saldoFinal,
+                    date: new Date(signal.unix).toISOString(),
+                    first: signal.trending3Signal
+                });
+
+            } else if (tipoOperacionInicial === signal.trending3Signal  && tipoOperacionInicial === 'BUY') {
+                console.log('BUY')
+                saldoFinal = saldoFinal * (1 - comisionVenta) / close;
+                // Registrar la operación de venta
+                operaciones.push({
+                    type: 'BUY',
+                    price: close,
+                    balance: saldoFinal,
+                    date: new Date(signal.unix).toISOString(),
+                    first: signal.trending3Signal
+                });
+            }
+        }else {
         // Determinar si es una señal de compra o venta
         if (signal.trending3Signal === 'BUY') {
             // Calcular el saldo final después de la compra
-            saldoFinal = (saldoFinal * (1 - 0.005)) / close;
+            saldoFinal = (saldoFinal * (1 - comisionCompra)) / close;
             // Registrar la operación de compra
             operaciones.push({
                 type: 'BUY',
                 price: close,
-                balance: saldoFinal
+                balance: saldoFinal,
+                date: new Date(signal.unix).toISOString()
             });
         } else if (signal.trending3Signal === 'SELL') {
             // Calcular el saldo final después de la venta
-            saldoFinal = saldoFinal * (1 - 0.003) * close;
+            saldoFinal = saldoFinal * (1 - comisionVenta) * close;
             // Registrar la operación de venta
             operaciones.push({
                 type: 'SELL',
                 price: close,
-                balance: saldoFinal
+                balance: saldoFinal,
+                date: new Date(signal.unix).toISOString()
             });
         }
-    }
+        }
+    };
 
     // Calcular el rendimiento total
     rendimientoTotal = ((saldoFinal - saldoInicial) / saldoInicial) * 100;

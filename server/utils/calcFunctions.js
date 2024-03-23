@@ -1,7 +1,9 @@
-const upDownTrending = (currentRecord, lastRecord, lastRecordTrending, atrLevel) => {
+const { logger } = require('../config/pino');
+
+const upDownTrending = (currentRecord, lastRecord, lastRecordTrending, atrLevel, atr) => {
     const lh2 = (currentRecord.low + currentRecord.high) / 2;
-    const up = lh2 - (atrLevel * currentRecord.atr7);
-    const down = lh2 + (atrLevel * currentRecord.atr7);
+    const up = lh2 - (atrLevel * currentRecord[atr]);
+    const down = lh2 + (atrLevel * currentRecord[atr]);
 
     let upTrend, downTrend;
     if (lastRecordTrending && lastRecordTrending.trending3) {
@@ -14,11 +16,11 @@ const upDownTrending = (currentRecord, lastRecord, lastRecordTrending, atrLevel)
     return { up, down, upTrend, downTrend };
 };
 
-const buySellSignalFunction = (currentRecord, lastRecordTrending, startUnix, up, down) => {
+const buySellSignalFunction = (currentRecord, lastRecordTrending, startUnix, up, down, atr) => {
     let buySellSignal, signal;
     /* if currentRecord is equal to first atr7 value on database, skip this process -because there is no trend data in no atr record data
     in lastRecord */
-    if (currentRecord.unix === startUnix.firstValues.atr7){
+    if (currentRecord.unix === startUnix.firstValues[atr]){
         logger.info(`[updateTrending] Current record is first atr record. Couldn't update buy sell signal`)
     }else{
     if( currentRecord.close > lastRecordTrending.trending3.downTrend ){

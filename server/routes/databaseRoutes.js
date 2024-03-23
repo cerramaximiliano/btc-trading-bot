@@ -28,6 +28,8 @@ router.get('/lastdata', async (req, res) => {
         const startUnixISO = new Date(parseInt(document.startUnix)).toISOString();
         const startUnixMissingDataISO = new Date(parseInt(document.startUnixMissingData)).toISOString();
         const startUpDownISO = new Date(parseInt(document.startUpDown)).toISOString();
+        const startUpDownArt10Trending3 = new Date(parseInt(document.startUpDownArt10Trending3)).toISOString();
+        const startUpDownArt14Trending3 = new Date(parseInt(document.startUpDownArt14Trending3)).toISOString();
         // Construir el nuevo documento con los valores transformados
         const transformedDocument = {
             startArt7: startArt7ISO,
@@ -35,10 +37,15 @@ router.get('/lastdata', async (req, res) => {
             startAtr14: startAtr14ISO,
             lastUnixRecord: lastUnixRecordISO,
             startUnix: startUnixISO,
+            startUpDownArt7Trending3: startUpDownISO,
+            startUpDownArt10Trending3: startUpDownArt10Trending3,
+            startUpDownArt14Trending3: startUpDownArt14Trending3,
             checkCompleteness: document.checkCompleteness,
             updateMissingData: document.updateMissingData,
             updateWrongData: document.updateWrongData,
             updateAtr: document.updateAtr,
+            updateAtr10: document.updateAtr10,
+            updateAtr14: document.updateAtr14,
             startUnixMissingData: startUnixMissingDataISO,
 /*            missingData: document.missingData,
             missingDataHandled: document.missingDataHandled,
