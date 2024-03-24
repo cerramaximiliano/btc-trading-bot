@@ -13,31 +13,40 @@ const schema = new mongoose.Schema({
     missingDataHandled: {type: Array},
     lastUnixRecord: {type: Number},
     checkCompleteness: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateMissingData: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateWrongData: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateAtr: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateAtr10: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateAtr14: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateUpDown: {
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateUpDownArt10Trend3:{
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     updateUpDownArt14Trend3:{
-        run: Boolean
+        run: Boolean,
+        stop: Boolean
     },
     firstValues: {
         atr7: Number,

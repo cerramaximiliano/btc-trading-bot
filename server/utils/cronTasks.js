@@ -1,8 +1,10 @@
 const cron = require('node-cron');
 const { logger } = require('../config/pino');
 
+let cronJob = {};
+
 const runCronTask = async (taskName, taskFunction, args, schedule, timezone) => {
-    cron.schedule(schedule, async () => {
+    let job = cron.schedule(schedule, async () => {
         try {
             await taskFunction(...args);
         } catch (error) {
@@ -13,6 +15,7 @@ const runCronTask = async (taskName, taskFunction, args, schedule, timezone) => 
         scheduled: true,
         timezone
     });
+    cronJob[taskName] = job
 };
 
-module.exports = { runCronTask };
+module.exports = { runCronTask, cronJob };
