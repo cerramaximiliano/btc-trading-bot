@@ -1,30 +1,43 @@
 const { logger } = require('../config/pino');
-const { cronJob } = require('../utils/cronTasks');
+const { cronJob, agenda } = require('../utils/cronTasks');
 const CHECKSTATUS = require('../models/checkStatus');
 
-const stopCronJob = (job, jobName) => {
-    if (!job) {
-        throw new Error(`Cron job '${jobName}' not found.`);
+const stopCronJob = async (jobName) => {
+    try {
+        const stop = await agenda.disable({name: jobName});
+        return stop
+    }catch(err){
+        throw new Error(err)
     }
-    job[jobName].stop(); // Detener el cron job
-    return `${jobName} status off`
 };
 
-const startCronJob = (job, jobName) => {
-    if (!job) {
-        throw new Error(`Cron job '${jobName}' not found.`);
+const startCronJob = async (jobName) => {
+    try {
+        const start = await agenda.enable({name: jobName});
+        return start
+    }catch(err){
+        throw new Error(err)
     }
-    job[jobName].start(); // Iniciar nuevamente el cron job
-    return `${jobName} status on`
 };
 
-// Función para modificar la variable de tiempo de un cron job
-const modifyCronSchedule = (job, jobName, newSchedule) => {
-    if (!job) {
-        throw new Error(`Cron job '${jobName}' not found.`);
+const cancelCronJob = async (name) => {
+    try{
+        const cancel = await agenda.cancel({name: name})
+        return cancel
+    }catch(err){
+        throw new Error(err)
     }
-    job[jobName].schedule(newSchedule); // Modificar la programación del cron job
-    return `${jobName} new schedule: ${newSchedule}`
+}
+
+const modifyCronSchedule = async (jobName, newSchedule) => {
+    try {
+        const modify = await agenda.define(jobName);
+        await agenda.every(schedule, taskName);
+        await agenda.start();
+        return modify;
+    }catch(err){
+        throw new Error
+    }
 };
 
-module.exports = {stopCronJob, startCronJob, modifyCronSchedule};
+module.exports = {stopCronJob, startCronJob, modifyCronSchedule, cancelCronJob};

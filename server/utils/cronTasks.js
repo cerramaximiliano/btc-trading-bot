@@ -1,21 +1,21 @@
-const cron = require('node-cron');
-const { logger } = require('../config/pino');
+const { agenda } = require("../config/agendaConfig");
 
-let cronJob = {};
+const runCronTask = async (objectArg) => {
+    const {taskName, handler, args, schedule, timezone} = objectArg;
+    agenda.define(taskName, async (job) => {
+            console.log(taskName, 'start')
+            handler(...args);
+      });
+      await agenda.start();
+      await agenda.every(schedule, taskName);
 
-const runCronTask = async (taskName, taskFunction, args, schedule, timezone) => {
-    let job = cron.schedule(schedule, async () => {
-        try {
-            await taskFunction(...args);
-        } catch (error) {
-            console.log(error)
-            logger.error(`[${taskName}] Error:`, error);
-        }
-    }, {
-        scheduled: true,
-        timezone
-    });
-    cronJob[taskName] = job
+      async function graceful() {
+        await agenda.cancel({repeatInterval: { $exists: true, $ne: null }})
+        await agenda.stop();
+        process.exit(0);
+      };
+        process.on("SIGTERM", graceful);
+        process.on("SIGINT", graceful);
 };
 
-module.exports = { runCronTask, cronJob };
+module.exports = { runCronTask, agenda };
