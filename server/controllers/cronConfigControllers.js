@@ -29,13 +29,16 @@ const cancelCronJob = async (name) => {
     }
 }
 
+
+// stop y definir nuevamente repeatInterval
 const modifyCronSchedule = async (jobName, newSchedule) => {
     try {
         const modify = await agenda.define(jobName);
-        await agenda.every(schedule, taskName);
+        await agenda.every(newSchedule, jobName);
         await agenda.start();
         return modify;
     }catch(err){
+        console.log(err)
         throw new Error
     }
 };
