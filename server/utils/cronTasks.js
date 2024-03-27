@@ -3,7 +3,7 @@ const { agenda } = require("../config/agendaConfig");
 const runCronTask = async (objectArg) => {
     const {taskName, handler, args, schedule, timezone} = objectArg;
     agenda.define(taskName, async (job) => {
-            console.log(taskName, 'start')
+            console.log(taskName, 'start', new Date())
             //handler(...args);
       });
       await agenda.start();

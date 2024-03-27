@@ -30,11 +30,11 @@ app.listen(3000, async () => {
 //runCronTask(cronConfig.updateMissingData);
 //runCronTask(cronConfig.checkCompleteness);
 //runCronTask(cronConfig.cronController);
-runCronTask(cronConfig.updateAtr7);
-runCronTask(cronConfig.updateAtr10);
-runCronTask(cronConfig.updateAtr14);
-runCronTask(cronConfig.updateTrendingAtr7); 
-runCronTask(cronConfig.updateTrendingAtr14); 
+//runCronTask(cronConfig.updateAtr7);
+//runCronTask(cronConfig.updateAtr10);
+//runCronTask(cronConfig.updateAtr14);
+//runCronTask(cronConfig.updateTrendingAtr7); 
+//runCronTask(cronConfig.updateTrendingAtr14); 
 runCronTask(cronConfig.updateTrendingAtr10); 
 
 app.use('/binance', binanceRoutes); 
