@@ -30,10 +30,7 @@ const cancelCronJob = async (name) => {
     }
 }
 
-
-// stop y definir nuevamente repeatInterval
 const modifyCronSchedule = async (jobName, newSchedule) => {
-
     try {
         const jobs = await agenda.jobs({ nextRunAt: { $exists: true } });
         const found = jobs.find(element => element.attrs.name === jobName);
@@ -41,7 +38,7 @@ const modifyCronSchedule = async (jobName, newSchedule) => {
             const cancel = await agenda.cancel({name: jobName})
             agenda.define(jobName, async (job) => {
                 console.log(jobName, 'start', new Date())
-                //handler(...args);
+                handler(...args);
           });
           await agenda.start();
           await agenda.every(newSchedule, jobName);
