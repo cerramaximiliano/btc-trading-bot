@@ -1,5 +1,6 @@
 const { agenda } = require("../config/agendaConfig");
-
+const Agendash = require('agendash');
+const agendash = Agendash(agenda);
 const runCronTask = async (objectArg) => {
     const {taskName, handler, args, schedule, timezone} = objectArg;
     agenda.define(taskName, async (job) => {
@@ -18,4 +19,4 @@ const runCronTask = async (objectArg) => {
         process.on("SIGINT", graceful);
 };
 
-module.exports = { runCronTask, agenda };
+module.exports = { runCronTask, agenda, agendash };

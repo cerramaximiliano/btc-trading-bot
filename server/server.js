@@ -1,13 +1,15 @@
 const express = require('express');
 const app = express();
 const { setupDatabase } = require('./config/databaseConfig.js');
+
 const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { logger } = require('./config/pino');
-const { runCronTask } = require('./utils/cronTasks');
+const { runCronTask, agendash } = require('./utils/cronTasks');
 const emmiter = require('./config/eventEmmiterConfig.js');
+
 
 const binanceRoutes = require('./routes/binanceRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
@@ -41,6 +43,5 @@ app.use('/binance', binanceRoutes);
 app.use('/database', databaseRoutes); 
 app.use('/trends', trendingRoutes);
 app.use('/signals', signalRoutes);
-app.use('/tasks', cronRoutes)
-
-
+app.use('/tasks', cronRoutes);
+app.use('/dash', agendash);
