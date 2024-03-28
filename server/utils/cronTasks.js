@@ -4,8 +4,8 @@ const agendash = Agendash(agenda);
 const runCronTask = async (objectArg) => {
     const {taskName, handler, args, schedule, timezone} = objectArg;
     agenda.define(taskName, async (job) => {
-            console.log(taskName, 'start', new Date())
-            //handler(...args);
+            console.log(taskName, 'start', new Date(), handler)
+            handler(...args);
       });
       await agenda.start();
       await agenda.every(schedule, taskName);

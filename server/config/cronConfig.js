@@ -1,10 +1,25 @@
 const { updateWrongData, updateMissingData, checkCompleteness, cronController, updateAtr, updateTrending } = require("../controllers/cronController");
+const deleteFile = require('../controllers/fsController');
 const BTC_USDT_BINANCE_15m_Trending_Atr7 = require('../models/btc-binance-15m-trending')
 const BTC_USDT_BINANCE_15m_Trending_Atr10 = require('../models/trending/btc-binance-15m-trendingAtr10');
 const BTC_USDT_BINANCE_15m_Trending_Atr14 = require('../models/trending/btc-binance-15m-trendingAtr14');
 
 
 const cronConfig = {
+    deleteFileLogger: {
+        taskName: 'deleteFile',
+        handler: deleteFile,
+        args: ['logger-error.log'],
+        schedule: '59 23 * * 1',
+        timeZone: 'America/Argentina/Buenos_Aires',
+    },
+    deleteFileLoggerError: {
+        taskName: 'deleteFileError',
+        handler: deleteFile,
+        args: [ 'logger.log'],
+        schedule: '58 23 * * 1',
+        timeZone: 'America/Argentina/Buenos_Aires',
+    },
     updateWrongData: {
         taskName: 'updateWrongData',
         handler: updateWrongData,
