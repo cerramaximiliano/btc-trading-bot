@@ -6,8 +6,8 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { logger } = require('./config/pino');
-const { runCronTask, agenda } = require('./utils/cronTasks');
-
+const { runCronTask } = require('./utils/cronTasks');
+const emmiter = require('./config/eventEmmiterConfig.js');
 
 const binanceRoutes = require('./routes/binanceRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
@@ -26,15 +26,15 @@ app.listen(3000, async () => {
     logger.info('listen on PORT 9000');
 });
 
-//runCronTask(cronConfig.updateWrongData);
-//runCronTask(cronConfig.updateMissingData);
-//runCronTask(cronConfig.checkCompleteness);
-//runCronTask(cronConfig.cronController);
-//runCronTask(cronConfig.updateAtr7);
-//runCronTask(cronConfig.updateAtr10);
-//runCronTask(cronConfig.updateAtr14);
-//runCronTask(cronConfig.updateTrendingAtr7); 
-//runCronTask(cronConfig.updateTrendingAtr14); 
+runCronTask(cronConfig.updateWrongData);
+runCronTask(cronConfig.updateMissingData);
+runCronTask(cronConfig.checkCompleteness);
+runCronTask(cronConfig.cronController);
+runCronTask(cronConfig.updateAtr7);
+runCronTask(cronConfig.updateAtr10);
+runCronTask(cronConfig.updateAtr14);
+runCronTask(cronConfig.updateTrendingAtr7); 
+runCronTask(cronConfig.updateTrendingAtr14); 
 runCronTask(cronConfig.updateTrendingAtr10); 
 
 app.use('/binance', binanceRoutes); 

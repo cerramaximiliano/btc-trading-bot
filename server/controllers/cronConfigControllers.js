@@ -42,7 +42,7 @@ const modifyCronSchedule = async (jobName, newSchedule) => {
           });
           await agenda.start();
           await agenda.every(newSchedule, jobName);
-    
+          console.log(found.attrs.name)
           async function graceful() {
             await agenda.cancel({repeatInterval: { $exists: true, $ne: null }})
             await agenda.stop();
