@@ -9,14 +9,14 @@ const cronConfig = {
     deleteFileLogger: {
         taskName: 'deleteFile',
         handler: deleteFile,
-        args: ['logger-error.log'],
+        args: ['logger.log'],
         schedule: '59 23 * * 1',
         timeZone: 'America/Argentina/Buenos_Aires',
     },
     deleteFileLoggerError: {
         taskName: 'deleteFileError',
         handler: deleteFile,
-        args: [ 'logger.log'],
+        args: ['logger-error.log'],
         schedule: '58 23 * * 1',
         timeZone: 'America/Argentina/Buenos_Aires',
     },
