@@ -1,4 +1,4 @@
-const BTC_USDT_BINANCE_15m_signal_atr7 = require('../models/btc-binance-15m-signal-atr7');
+const BTC_USDT_BINANCE_15m_signal_atr7 = require('../models/signal/btc-binance-15m-signal-atr7');
 const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 
 // Controlador para manejar la consulta de señales

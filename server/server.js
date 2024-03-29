@@ -8,8 +8,6 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { logger } = require('./config/pino');
 const { runCronTask, agendash } = require('./utils/cronTasks');
-const emmiter = require('./config/eventEmmiterConfig.js');
-
 
 const binanceRoutes = require('./routes/binanceRoutes');
 const databaseRoutes = require('./routes/databaseRoutes');
@@ -27,7 +25,7 @@ app.listen(3000, async () => {
     setupDatabase();
     logger.info('listen on PORT 9000');
 });
-/* 
+
 runCronTask(cronConfig.updateWrongData);
 runCronTask(cronConfig.updateMissingData);
 runCronTask(cronConfig.checkCompleteness);
@@ -37,7 +35,7 @@ runCronTask(cronConfig.updateAtr10);
 runCronTask(cronConfig.updateAtr14);
 runCronTask(cronConfig.updateTrendingAtr7); 
 runCronTask(cronConfig.updateTrendingAtr14); 
-runCronTask(cronConfig.updateTrendingAtr10);  */
+runCronTask(cronConfig.updateTrendingAtr10);
 runCronTask(cronConfig.deleteFileLogger);
 runCronTask(cronConfig.deleteFileLoggerError);
 

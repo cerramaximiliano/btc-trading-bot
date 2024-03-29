@@ -1,6 +1,7 @@
 const { agenda } = require("../config/agendaConfig");
 const Agendash = require('agendash');
 const agendash = Agendash(agenda);
+process.setMaxListeners(15);
 const runCronTask = async (objectArg) => {
     const {taskName, handler, args, schedule, timezone} = objectArg;
     agenda.define(taskName, async (job) => {

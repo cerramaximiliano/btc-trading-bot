@@ -3,7 +3,7 @@ const { logger } = require('../config/pino');
 const BTC_USDT_BINANCE_15m = require('../models/btc-binance-15m');
 const CHECKSTATUS = require('../models/checkStatus');
 const BTC_USDT_BINANCE_15m_Trending_Atr7 = require('../models/btc-binance-15m-trending');
-const BTC_USDT_BINANCE_15m_Signal_Atr7 = require('../models/btc-binance-15m-signal-atr7');
+const BTC_USDT_BINANCE_15m_Signal_Atr7 = require('../models/signal/btc-binance-15m-signal-atr7');
 const BTC_USDT_BINANCE_15m_Trending_Atr10 = require('../models/trending/btc-binance-15m-trendingAtr10');
 const BTC_USDT_BINANCE_15m_Trending_Atr14 = require('../models/trending/btc-binance-15m-trendingAtr14');
 const { ticksPromise } = require('./binanceController');
@@ -254,7 +254,7 @@ const updateAtr = async (atrType, atrField, startField, updateUpDown, updateAtrP
 
 
 
-const updateTrending = async (start, run, atr, level, model) => {
+const updateTrending = async (start, run, atr, level, model, modelSignal) => {
     try {
         const INTERVAL_DIFFERENCE = 15 * 60000;
         const startUnix = await CHECKSTATUS.findOne({_id: "65ea47f3c00ef4507c6b71a4"});
@@ -310,7 +310,7 @@ const updateTrending = async (start, run, atr, level, model) => {
                                             obj.unix = currentRecord.unix
                                         }
                                         if ( obj.signal ){
-                                            const signal = await BTC_USDT_BINANCE_15m_Signal_Atr7.findOneAndUpdate(
+                                            const signal = await modelSignal.findOneAndUpdate(
                                                 {unix: currentRecord.unix},
                                                 {   date: obj.date,
                                                     trending3Signal: obj.signal
