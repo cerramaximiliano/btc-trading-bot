@@ -80,7 +80,7 @@ const cronConfig = {
         taskName: 'updateTrendingAtr7',
         handler: updateTrending,
         args: ['startUpDown', 'updateUpDown', 'atr7', 3, BTC_USDT_BINANCE_15m_Trending_Atr7],
-        schedule: '*/5 * * * *',
+        schedule: '*/1 * * * *',
         timeZone: 'America/Argentina/Buenos_Aires',
         route: '/update-trending-atr7'
     },
@@ -96,7 +96,7 @@ const cronConfig = {
         taskName: 'updateTrendingAtr10',
         handler: updateTrending,
         args: ['startUpDownArt10Trending3', 'updateUpDownArt10Trend3', 'atr10', 3, BTC_USDT_BINANCE_15m_Trending_Atr10],
-        schedule: '*/1 * * * * *',
+        schedule: '*/1 * * * *',
         timeZone: 'America/Argentina/Buenos_Aires',
         route: '/update-trending-atr10'
     }
