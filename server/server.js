@@ -21,9 +21,9 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-app.listen(process.env.PORT, async () => {
+app.listen(process.env.PORT || 3000, async () => {
     setupDatabase();
-    logger.info(`listen on PORT ${process.env.PORT}`);
+    logger.info(`listen on PORT ${process.env.PORT || 3000}`);
 });
 
 runCronTask(cronConfig.updateWrongData);
