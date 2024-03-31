@@ -14,6 +14,7 @@ const databaseRoutes = require('./routes/databaseRoutes');
 const trendingRoutes = require('./routes/trendingRoutes');
 const signalRoutes = require('./routes/signalRoutes');
 const cronRoutes = require('./routes/cronRoutes');
+const userRoutes = require('./routes/userRoutes')
 const cronConfig = require('./config/cronConfig.js');
 
 app.use(cors());
@@ -45,3 +46,4 @@ app.use('/trends', trendingRoutes);
 app.use('/signals', signalRoutes);
 app.use('/tasks', cronRoutes);
 app.use('/dash', agendash);
+app.use('/users', userRoutes);
