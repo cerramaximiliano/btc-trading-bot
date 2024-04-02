@@ -14,8 +14,9 @@ const databaseRoutes = require('./routes/databaseRoutes');
 const trendingRoutes = require('./routes/trendingRoutes');
 const signalRoutes = require('./routes/signalRoutes');
 const cronRoutes = require('./routes/cronRoutes');
-const userRoutes = require('./routes/userRoutes')
+const userRoutes = require('./routes/userRoutes');
 const cronConfig = require('./config/cronConfig.js');
+const { authorization } = require('./routes/middlewares.js');
 
 app.use(cors());
 app.use(cookieParser());
@@ -45,5 +46,5 @@ app.use('/database', databaseRoutes);
 app.use('/trends', trendingRoutes);
 app.use('/signals', signalRoutes);
 app.use('/tasks', cronRoutes);
-app.use('/dash', agendash);
+app.use('/dash', authorization, agendash);
 app.use('/users', userRoutes);
