@@ -4,7 +4,7 @@ const ApiKey = require('../models/apiKey.model');
 const authorization = async (req, res, next) => {
     const token = req.cookies.token;
     const apiKey = req.headers['x-api-key'];
-    console.log(apiKey, token)
+
     if (!token && !apiKey) {
       return res.status(401).json({ message: 'No token or API key received.' });
     }
