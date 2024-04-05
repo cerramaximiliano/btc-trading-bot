@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
+const { firebase } = require('../config/firebaseConfig');
 
 async function signUp(req,res) {
     try {

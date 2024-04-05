@@ -1,19 +1,34 @@
 const jwt = require('jsonwebtoken');
+const ApiKey = require('../models/apiKey.model');
 
-
-const authorization = (req, res, next) => {
+const authorization = async (req, res, next) => {
     const token = req.cookies.token;
-    console.log(token)
-    if (!token) {
-      return res.status(401).json({ message: 'No token recived.' });
+    const apiKey = req.headers['x-api-key'];
+    console.log(apiKey, token)
+    if (!token && !apiKey) {
+      return res.status(401).json({ message: 'No token or API key received.' });
     }
     try {
-    const decoded = jwt.verify(token, process.env.SEED);
-    req.user = decoded;
+      let decoded;
+      if (token) {
+        decoded = jwt.verify(token, process.env.SEED);
+      }
+      if (apiKey) {
+        const apiKeyDocument = await ApiKey.findOne({ key: apiKey });
+        if (!apiKeyDocument) {
+          return res.status(401).json({ message: 'Invalid API key.' });
+        }
+      }
+      if (decoded) {
+        req.user = decoded;
+      }
+  
       next();
     } catch (error) {
-      return res.status(401).json({ message: 'Invalid token.' });
+      return res.status(401).json({ message: 'Invalid token or API key.' });
     }
+
+
   };
   
 

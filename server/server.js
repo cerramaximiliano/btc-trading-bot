@@ -15,6 +15,7 @@ const trendingRoutes = require('./routes/trendingRoutes');
 const signalRoutes = require('./routes/signalRoutes');
 const cronRoutes = require('./routes/cronRoutes');
 const userRoutes = require('./routes/userRoutes');
+const apiKeys = require('./routes/apiKeysRoutes')
 const cronConfig = require('./config/cronConfig.js');
 const { authorization } = require('./routes/middlewares.js');
 
@@ -28,18 +29,18 @@ app.listen(process.env.PORT || 3000, async () => {
     logger.info(`listen on PORT ${process.env.PORT || 3000}`);
 });
 
-runCronTask(cronConfig.updateWrongData);
-runCronTask(cronConfig.updateMissingData);
-runCronTask(cronConfig.checkCompleteness);
-runCronTask(cronConfig.cronController);
-runCronTask(cronConfig.updateAtr7);
-runCronTask(cronConfig.updateAtr10);
-runCronTask(cronConfig.updateAtr14);
-runCronTask(cronConfig.updateTrendingAtr7); 
-runCronTask(cronConfig.updateTrendingAtr14); 
-runCronTask(cronConfig.updateTrendingAtr10);
-runCronTask(cronConfig.deleteFileLogger);
-runCronTask(cronConfig.deleteFileLoggerError);
+//runCronTask(cronConfig.updateWrongData);
+//runCronTask(cronConfig.updateMissingData);
+//runCronTask(cronConfig.checkCompleteness);
+//runCronTask(cronConfig.cronController);
+//runCronTask(cronConfig.updateAtr7);
+//runCronTask(cronConfig.updateAtr10);
+//runCronTask(cronConfig.updateAtr14);
+//runCronTask(cronConfig.updateTrendingAtr7); 
+//runCronTask(cronConfig.updateTrendingAtr14); 
+//runCronTask(cronConfig.updateTrendingAtr10);
+//runCronTask(cronConfig.deleteFileLogger);
+//runCronTask(cronConfig.deleteFileLoggerError);
 
 app.use('/binance', binanceRoutes); 
 app.use('/database', databaseRoutes); 
@@ -48,3 +49,4 @@ app.use('/signals', signalRoutes);
 app.use('/tasks', cronRoutes);
 app.use('/dash', authorization, agendash);
 app.use('/users', userRoutes);
+app.use('/api', apiKeys)
