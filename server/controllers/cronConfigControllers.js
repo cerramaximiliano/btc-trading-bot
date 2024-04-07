@@ -2,6 +2,12 @@ const { logger } = require('../config/pino');
 const { cronJob, agenda } = require('../utils/cronTasks');
 const CHECKSTATUS = require('../models/checkStatus');
 const cronConfig = require('../config/cronConfig');
+const mongoose = require('mongoose');
+
+(async () => {
+
+})()
+
 
 const stopCronJob = async (jobName) => {
     try {
@@ -54,13 +60,15 @@ const modifyCronSchedule = async (jobName, newSchedule) => {
         }else{
             console.log('no se encontro el job, retornar error')
         }
-
         return true
-
     }catch(err){
-        console.log(err)
+
         throw new Error
     }
 };
 
-module.exports = {stopCronJob, startCronJob, modifyCronSchedule, cancelCronJob};
+const getAllTasks = async (req,res) => {
+
+};
+
+module.exports = {stopCronJob, startCronJob, modifyCronSchedule, cancelCronJob, getAllTasks};
