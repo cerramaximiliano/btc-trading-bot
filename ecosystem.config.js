@@ -4,7 +4,7 @@ module.exports = {
             name: 'btc-admin',
             script: './server/server.js',
             env: {
-                PORT: 3001
+                PORT: 3030
             },
             exec_mode: 'fork',
             instance: 1,
