@@ -19,6 +19,7 @@ const cronRoutes = require('./routes/cronRoutes');
 const userRoutes = require('./routes/userRoutes');
 const apiKeys = require('./routes/apiKeysRoutes');
 const agendaRoutes = require('./routes/agendaRoutes')
+const logFiles = require('./routes/logRoutes')
 const cronConfig = require('./config/cronConfig.js');
 const { authorization } = require('./routes/middlewares.js');
 
@@ -56,3 +57,4 @@ app.use('/tasks', authorization, agendaRoutes);
 app.use('/dash', authorization, agendash);
 app.use('/users', userRoutes);
 app.use('/api', apiKeys);
+app.use('/files', logFiles);
