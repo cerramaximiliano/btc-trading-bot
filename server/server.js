@@ -8,6 +8,9 @@ const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+app.use(cors({
+    origin: 'https://adminboards.app'
+  }));
 const { logger } = require('./config/pino');
 const { runCronTask, agendash } = require('./utils/cronTasks');
 
