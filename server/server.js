@@ -7,10 +7,19 @@ app.use(express.static(path.resolve(__dirname, '../dist')));
 const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+
 const cors = require('cors');
-app.use(cors({
-    origin: 'https://adminboards.app'
-  }));
+const allowedOrigins = ['http://localhost:3001','https://adminboards.app', 'https://www.adminboards.app'];
+app.use(cors({origin: function(origin, callback){
+if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+        const msg = 'The CORS policy for this site does not ' + 'allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+    }
+        return callback(null, true);
+    }
+}));
+
 const { logger } = require('./config/pino');
 const { runCronTask, agendash } = require('./utils/cronTasks');
 
