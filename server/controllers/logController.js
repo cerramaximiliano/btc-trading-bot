@@ -19,10 +19,10 @@ const getLogFiles = (req, res) => {
         createdAt: stats.birthtime,
         modifiedAt: stats.mtime,
         size: stats.size,
-        type: path.extname(file).substring(1)
+        type: 'TXT'
       };
     });
-    res.json(logInfo);
+    res.json({items: logInfo});
   });
 };
 
