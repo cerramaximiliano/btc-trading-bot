@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 const { setupDatabase } = require('./config/databaseConfig.js');
+const path = require('path')
+app.use(express.static(path.resolve(__dirname, '../dist')));
 
 const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
@@ -50,7 +52,7 @@ app.use('/database', databaseRoutes);
 app.use('/trends', trendingRoutes);
 app.use('/signals', signalRoutes);
 app.use('/cron', cronRoutes);
-app.use('/tasks', agendaRoutes);
+app.use('/tasks', authorization, agendaRoutes);
 app.use('/dash', authorization, agendash);
 app.use('/users', userRoutes);
 app.use('/api', apiKeys);

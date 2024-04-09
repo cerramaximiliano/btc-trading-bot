@@ -35,94 +35,112 @@ const { agenda } = require("../config/agendaConfig");
   const getJobs = function (job, state, options) {
     const preMatch = {};
     if (job) {
-      preMatch.name = job; // Mantenemos 'name' para la búsqueda
+        preMatch.name = job; // Mantenemos 'name' para la búsqueda
     }
 
     if (options.query && options.property) {
-      if (options.isObjectId) {
-        preMatch[options.property] = new ObjectId(options.query);
-      } else if (/^\d+$/.test(options.query)) {
-        preMatch[options.property] = Number.parseInt(options.query, 10);
-      } else {
-        preMatch[options.property] = { $regex: options.query, $options: "i" };
-      }
+        if (options.isObjectId) {
+            preMatch[options.property] = new ObjectId(options.query);
+        } else if (/^\d+$/.test(options.query)) {
+            preMatch[options.property] = Number.parseInt(options.query, 10);
+        } else {
+            preMatch[options.property] = { $regex: options.query, $options: "i" };
+        }
     }
 
     const postMatch = {};
     if (state) {
-      postMatch[state] = true;
+        postMatch[state] = true;
     }
 
     const collection = agenda._collection.collection || agenda._collection;
     return collection
-      .aggregate([
-        { $match: preMatch },
-        {
-          $sort: {
-            repeatInterval: -1,
-            nextRunAt: -1,
-            lastRunAt: -1,
-            lastFinishedAt: -1,
-          },
-        },
-        {
-          $project: {
-            title: "$name", // Cambiamos el nombre del campo 'name' a 'title'
-            repeatInterval: 1, // Incluimos la propiedad 'repeatInterval'
-            nextRunAt: 1, // Incluimos la propiedad 'nextRunAt'
-            lastRunAt: 1, // Incluimos la propiedad 'lastRunAt'
-            _id: "$$ROOT._id",
-            lastFinishedAt: 1, // Incluimos la propiedad 'lastFinishedAt'
-            running: {
-              $and: ["$lastRunAt", { $gt: ["$lastRunAt", "$lastFinishedAt"] }],
-            },
-            scheduled: {
-              $and: ["$nextRunAt", { $gte: ["$nextRunAt", new Date()] }],
-            },
-            queued: {
-              $and: [
-                "$nextRunAt",
-                { $gte: [new Date(), "$nextRunAt"] },
-                { $gte: ["$nextRunAt", "$lastFinishedAt"] },
-              ],
-            },
-            completed: {
-              $and: [
-                "$lastFinishedAt",
-                { $gt: ["$lastFinishedAt", "$failedAt"] },
-              ],
-            },
-            failed: {
-              $and: [
-                "$lastFinishedAt",
-                "$failedAt",
-                { $eq: ["$lastFinishedAt", "$failedAt"] },
-              ],
-            },
-            repeating: {
-              $and: ["$repeatInterval", { $ne: ["$repeatInterval", null] }],
-            },
-          },
-        },
-        { $match: postMatch },
-        {
-          $facet: {
-            pages: [
-              { $count: "totalMatchs" },
-              {
-                $project: {
-                  totalPages: {
-                    $ceil: { $divide: ["$totalMatchs", options.limit] },
-                  },
+        .aggregate([
+            { $match: preMatch },
+            {
+                $sort: {
+                    repeatInterval: -1,
+                    nextRunAt: -1,
+                    lastRunAt: -1,
+                    lastFinishedAt: -1,
                 },
-              },
-            ],
-            filtered: [{ $skip: options.skip }, { $limit: options.limit }],
-          },
-        },
-      ])
-      .toArray();
-  };
+            },
+            {
+                $project: {
+                    title: "$name", // Cambiamos el nombre del campo 'name' a 'title'
+                    id: "$_id",
+                    repeatInterval: 1, // Incluimos la propiedad 'repeatInterval'
+                    nextRunAt: 1, // Incluimos la propiedad 'nextRunAt'
+                    lastRunAt: 1, // Incluimos la propiedad 'lastRunAt'
+                    lastFinishedAt: 1, // Incluimos la propiedad 'lastFinishedAt'
+                    running: {
+                        $and: ["$lastRunAt", { $gt: ["$lastRunAt", "$lastFinishedAt"] }],
+                    },
+                    scheduled: {
+                        $and: ["$nextRunAt", { $gte: ["$nextRunAt", new Date()] }],
+                    },
+                    queued: {
+                        $and: [
+                            "$nextRunAt",
+                            { $gte: [new Date(), "$nextRunAt"] },
+                            { $gte: ["$nextRunAt", "$lastFinishedAt"] },
+                        ],
+                    },
+                    completed: {
+                        $and: [
+                            "$lastFinishedAt",
+                            { $gt: ["$lastFinishedAt", "$failedAt"] },
+                        ],
+                    },
+                    failed: {
+                        $and: [
+                            "$lastFinishedAt",
+                            "$failedAt",
+                            { $eq: ["$lastFinishedAt", "$failedAt"] },
+                        ],
+                    },
+                    repeating: {
+                        $and: ["$repeatInterval", { $ne: ["$repeatInterval", null] }],
+                    },
+                },
+            },
+            { $match: postMatch },
+            { 
+                $project: { 
+                    id: "$_id",
+                    title: 1,
+                    repeatInterval: 1,
+                    nextRunAt: 1,
+                    lastRunAt: 1,
+                    lastFinishedAt: 1,
+                    running: 1,
+                    scheduled: 1,
+                    queued: 1,
+                    completed: 1,
+                    failed: 1,
+                    repeating: 1
+                } 
+            },
+            {
+                $facet: {
+                    pages: [
+                        { $count: "totalMatchs" },
+                        {
+                            $project: {
+                                totalPages: {
+                                    $ceil: { $divide: ["$totalMatchs", options.limit] },
+                                },
+                            },
+                        },
+                    ],
+                    filtered: [{ $skip: options.skip }, { $limit: options.limit }],
+                },
+            },
+        ])
+        .toArray();
+        
+};
+
 
 
 
@@ -240,17 +258,18 @@ const { agenda } = require("../config/agendaConfig");
       failed: 0,
       repeating: 0,
     };
-    const totals = { displayName: "All Jobs", ...states };
-
+    const totals = { title: "BTC Agenda Cron Tasks", type: "section", ...states };
     for (const job of results) {
       for (const state of Object.keys(states)) {
         totals[state] += job[state];
       }
     }
-
     results.unshift(totals);
-    return results;
-  };
+    const randomId = new ObjectId();
+      results[0].id = randomId;
+    return [results[0]];
+};
+
 
   const api = async function (
     job,
@@ -269,18 +288,43 @@ const { agenda } = require("../config/agendaConfig");
       getJobs(job, state, { query: q, property, isObjectId, skip, limit }),
     ]);
     const apiResponse = {
-      overview,
-      jobs: jobs[0].filtered,
-      totalPages: jobs[0].pages[0] ? jobs[0].pages[0].totalPages : 0,
+      ...{overview},
+      jobs: jobs[0].filtered
     };
-    apiResponse.title = options.title || "Agendash";
-    apiResponse.currentRequest = {
-      title: options.title || "Agendash",
-      job: job || "All Jobs",
-      state,
-    };
-    return apiResponse;
+    const overviewArray = apiResponse.overview;
+    const jobsArray = apiResponse.jobs;
+
+    const overviewOnly = overviewArray.map(item => {
+      const { title, type, total, running, scheduled, queued, completed, failed, repeating } = item;
+      return { title, id: new ObjectId(), type, total, running, scheduled, queued, completed, failed, repeating, order: 0 };
+  });
+  
+  const jobsOnly = jobsArray.map((item, index) => {
+    const { nextRunAt, repeatInterval, title, _id, running, scheduled, queued, completed, failed, repeating } = item;
+    return { nextRunAt, repeatInterval, title, id: _id, running, scheduled, queued, completed, failed, repeating, type: "task", order:index+1 };
+});
+
+  
+  const filteredApiResponse = overviewOnly.concat(jobsOnly);
+  return filteredApiResponse
   };
+
+  const findJobById = async (jobId) => {
+    console.log(jobId)
+    if (!agenda) {
+      return Promise.reject(new Error("Agenda instance is not ready"));
+    }
+    const collection = agenda._collection.collection || agenda._collection;
+    try {
+      const job = await collection.findOne({_id: ObjectId(jobId)})
+      if (job.length === 0) {
+        throw new Error("Job not found");
+      }
+      return job;
+    }catch(err){
+      throw new Error(err)
+    }
+  }
 
   const requeueJobs = async (jobIds) => {
     if (!agenda) {
@@ -338,4 +382,4 @@ const { agenda } = require("../config/agendaConfig");
   };
 
 
-module.exports = {api, requeueJobs, deleteJobs, createJob};
+module.exports = {api, requeueJobs, deleteJobs, createJob, findJobById};
