@@ -21,7 +21,6 @@ router.get('/totals', async (req, res) => {
     try {
         const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
         const ticks = await totalsTicks(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
-        console.log(ticks)
         res.json(ticks);
     } catch (error) {
         logger.error(`error: ${error}`)

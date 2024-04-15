@@ -92,7 +92,6 @@ const totalsTicks = async ( ticker, timeFrame, limit, startTime, endTime, atr7, 
         const totalCount = await Promise.all([
             BTC_USDT_BINANCE_15m.countDocuments(query) // Contar la cantidad total de elementos encontrados
         ]);
-        console.log(totalCount)
         return totalCount;
     } catch (error) {
         throw error;
