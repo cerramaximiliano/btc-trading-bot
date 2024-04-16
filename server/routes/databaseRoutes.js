@@ -1,14 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { findTicks, totalsTicks, deleteTicksByUnix } = require('../controllers/databaseController');
+const { findTicks, totalsTicks, deleteTicksByUnix, trendAtr7, trendAtr10, trendAtr14 } = require('../controllers/databaseController');
 const { logger } = require('../config/pino');
 const CHECKSTATUS = require('../models/checkStatus');
 
 router.get('/ticks', async (req, res) => {
     try {
         const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
-
-        // Llamar a la función findTicks con los parámetros proporcionados
         const ticks = await findTicks(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
         res.json(ticks);
     } catch (error) {
@@ -21,6 +19,39 @@ router.get('/totals', async (req, res) => {
     try {
         const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
         const ticks = await totalsTicks(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
+        res.json(ticks);
+    } catch (error) {
+        logger.error(`error: ${error}`)
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/trendatr7', async (req, res) => {
+    try {
+        const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
+        const ticks = await trendAtr7(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
+        res.json(ticks);
+    } catch (error) {
+        logger.error(`error: ${error}`)
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/trendatr10', async (req, res) => {
+    try {
+        const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
+        const ticks = await trendAtr10(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
+        res.json(ticks);
+    } catch (error) {
+        logger.error(`error: ${error}`)
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/trendatr14', async (req, res) => {
+    try {
+        const { ticker, timeFrame, limit, startTime, endTime, atr7, page, order } = req.query;
+        const ticks = await trendAtr14(ticker, timeFrame, limit, startTime, endTime, atr7, page, order);
         res.json(ticks);
     } catch (error) {
         logger.error(`error: ${error}`)
