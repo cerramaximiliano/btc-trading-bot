@@ -22,7 +22,7 @@ const trendAtr7 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pag
                 if (Object.keys(unixQuery).length !== 0) {
                     query.unix = unixQuery;
                 }
-        let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, unix: 1, atr7: 1, atr10: 1, atr14: 1};
+        let options = { date: 1, trending3: 1};
         if (limit !== undefined) {
             limit = parseInt(limit);
         } else {
@@ -71,7 +71,7 @@ const trendAtr10 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pa
                 }
 
         // Inicializar options con los campos a seleccionar
-        let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, unix: 1, atr7: 1, atr10: 1, atr14: 1};
+        let options = { date: 1, trending3: 1};
         // Si limit está definido, añadirlo a las opciones
         if (limit !== undefined) {
             limit = parseInt(limit);
@@ -123,7 +123,7 @@ const trendAtr14 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pa
                 }
 
         // Inicializar options con los campos a seleccionar
-        let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, unix: 1, atr7: 1, atr10: 1, atr14: 1};
+        let options = { date: 1, trending3: 1};
         // Si limit está definido, añadirlo a las opciones
         if (limit !== undefined) {
             limit = parseInt(limit);
@@ -175,7 +175,7 @@ const findTicks = async (ticker, timeFrame, limit, startTime, endTime, atr7, pag
                 }
 
         // Inicializar options con los campos a seleccionar
-        let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, unix: 1, atr7: 1, atr10: 1, atr14: 1};
+        let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, atr10: 1, atr14: 1};
         // Si limit está definido, añadirlo a las opciones
         if (limit !== undefined) {
             limit = parseInt(limit);
@@ -187,13 +187,12 @@ const findTicks = async (ticker, timeFrame, limit, startTime, endTime, atr7, pag
             pageNumber = (pageNumber - 1) * limit;
         }
         // Realizar la consulta a la base de datos
-        const [data, totalCount] = await Promise.all([
+        const [ data ] = await Promise.all([
             BTC_USDT_BINANCE_15m.find(query)
                                 .sort({ unix: order || 1 }) // Ordenar por fecha Unix descendente
                                 .limit(limit)
                                 .skip(pageNumber || 0)
                                 .select(options), // Seleccionar solo los campos requeridos
-            BTC_USDT_BINANCE_15m.countDocuments(query) // Contar la cantidad total de elementos encontrados
         ]);
         return data;
     } catch (error) {
