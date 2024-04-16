@@ -3,46 +3,35 @@ const BTC_USDT_BINANCE_15m_Trending_Atr7 = require('../models/btc-binance-15m-tr
 const BTC_USDT_BINANCE_15m_Trending_Atr10 = require('../models/trending/btc-binance-15m-trendingAtr10');
 const BTC_USDT_BINANCE_15m_Trending_Atr14 = require('../models/trending/btc-binance-15m-trendingAtr14');
 
-const trendAtr7 = async () => {
+const trendAtr7 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pageNumber, order) => {
     try {
         let query = {};
-        // Construir la consulta básica para el ticker y el timeFrame
         query.ticker = ticker;
         query.timeFrame = timeFrame;
-        // Agregar búsqueda por fecha si startTime y endTime no son undefined
-                // Construir la parte del query para unix
+
                 let unixQuery = {};
                 if (startTime !== undefined && endTime !== undefined) {
-                    // Si startTime y endTime están definidos, buscar entre ellos
                     unixQuery.$gte = parseInt(startTime);
                     unixQuery.$lte = parseInt(endTime);
                 } else if (startTime !== undefined) {
-                    // Si solo startTime está definido, buscar a partir de ese momento
                     unixQuery.$gte = parseInt(startTime);
                 } else if (endTime !== undefined) {
-                    // Si solo endTime está definido, buscar hasta ese momento
                     unixQuery.$lte = parseInt(endTime);
                 }
                 
-                // Agregar búsqueda por fecha a la consulta
                 if (Object.keys(unixQuery).length !== 0) {
                     query.unix = unixQuery;
                 }
-
-        // Inicializar options con los campos a seleccionar
         let options = { date: 1, open: 1, high: 1, low: 1, close: 1, atr7: 1, unix: 1, atr7: 1, atr10: 1, atr14: 1};
-        // Si limit está definido, añadirlo a las opciones
         if (limit !== undefined) {
             limit = parseInt(limit);
         } else {
-            limit = 100; // Establecer un límite predeterminado si no se proporciona limit
+            limit = 100;
         }
-        // Calcular el número de documentos para saltar (offset) basado en el número de página
         if (pageNumber !== undefined && pageNumber > 0) {
             pageNumber = (pageNumber - 1) * limit;
         }
-        // Realizar la consulta a la base de datos
-        const data = await Promise.all([
+        const [data] = await Promise.all([
             BTC_USDT_BINANCE_15m_Trending_Atr7.find(query)
                                 .sort({ unix: order || 1 }) // Ordenar por fecha Unix descendente
                                 .limit(limit)
@@ -55,7 +44,7 @@ const trendAtr7 = async () => {
     }
 };
 
-const trendAtr10 = async () => {
+const trendAtr10 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pageNumber, order) => {
     try {
         let query = {};
         // Construir la consulta básica para el ticker y el timeFrame
@@ -94,13 +83,12 @@ const trendAtr10 = async () => {
             pageNumber = (pageNumber - 1) * limit;
         }
         // Realizar la consulta a la base de datos
-        const data = await Promise.all([
+        const [data] = await Promise.all([
             BTC_USDT_BINANCE_15m_Trending_Atr10.find(query)
                                 .sort({ unix: order || 1 }) // Ordenar por fecha Unix descendente
                                 .limit(limit)
                                 .skip(pageNumber || 0)
                                 .select(options), // Seleccionar solo los campos requeridos
-            BTC_USDT_BINANCE_15m.countDocuments(query) // Contar la cantidad total de elementos encontrados
         ]);
         return data;
     } catch (error) {
@@ -108,7 +96,7 @@ const trendAtr10 = async () => {
     }
 };
 
-const trendAtr14 = async () => {
+const trendAtr14 = async (ticker, timeFrame, limit, startTime, endTime, atr7, pageNumber, order) => {
     try {
         let query = {};
         // Construir la consulta básica para el ticker y el timeFrame
@@ -147,13 +135,12 @@ const trendAtr14 = async () => {
             pageNumber = (pageNumber - 1) * limit;
         }
         // Realizar la consulta a la base de datos
-        const data = await Promise.all([
+        const [data] = await Promise.all([
             BTC_USDT_BINANCE_15m_Trending_Atr14.find(query)
                                 .sort({ unix: order || 1 }) // Ordenar por fecha Unix descendente
                                 .limit(limit)
                                 .skip(pageNumber || 0)
                                 .select(options), // Seleccionar solo los campos requeridos
-            BTC_USDT_BINANCE_15m.countDocuments(query) // Contar la cantidad total de elementos encontrados
         ]);
         return data;
     } catch (error) {
