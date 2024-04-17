@@ -13,19 +13,10 @@ const allowedOrigins = ['http://localhost:3001','https://adminboards.app', 'http
 app.use(cors());
 
 const { logger } = require('./config/pino');
-const { runCronTask, agendash } = require('./utils/cronTasks');
+const { runCronTask } = require('./utils/cronTasks');
 
-const binanceRoutes = require('./routes/binanceRoutes');
-const databaseRoutes = require('./routes/databaseRoutes');
-const trendingRoutes = require('./routes/trendingRoutes');
-const signalRoutes = require('./routes/signalRoutes');
-const cronRoutes = require('./routes/cronRoutes');
-const userRoutes = require('./routes/userRoutes');
-const apiKeys = require('./routes/apiKeysRoutes');
-const agendaRoutes = require('./routes/agendaRoutes')
-const filesRoutes = require('./routes/filesRoutes')
 const cronConfig = require('./config/cronConfig.js');
-const { authorization } = require('./routes/middlewares.js');
+const routes = require('./routes/indexRoutes');
 
 app.use(cors());
 app.use(cookieParser());
@@ -52,13 +43,4 @@ if( process.env.ENVIROMENT === 'PRODUCTION'){
     runCronTask(cronConfig.deleteFileLoggerError);
 }
 
-app.use('/binance', binanceRoutes); 
-app.use('/database', databaseRoutes); 
-app.use('/trends', trendingRoutes);
-app.use('/signals', signalRoutes);
-app.use('/cron', cronRoutes);
-app.use('/tasks', authorization, agendaRoutes);
-app.use('/dash', authorization, agendash);
-app.use('/users', userRoutes);
-app.use('/api', apiKeys);
-app.use('/files', filesRoutes);
+app.use(routes);
